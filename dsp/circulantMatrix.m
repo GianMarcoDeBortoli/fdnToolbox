@@ -61,7 +61,7 @@ classdef circulantMatrix < handle
             % feedback processing
             N = obj.numberOfOutputs;
             rows = 1/N * fft(e, N, 2);
-            C = blockCirculant(rows);
+            C = blockCirculant(rows, len, N);
             
             % output
             out = sum(C .* in, 2);

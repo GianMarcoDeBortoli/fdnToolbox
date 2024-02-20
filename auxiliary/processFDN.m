@@ -65,6 +65,10 @@ switch inputType
         output = output + input * D.';
 end
 
+if ~isempty(extraMatrixType) && strcmp(extraMatrixType, 'Circulant')
+        output = real(output);
+end
+
 
 
 
@@ -120,9 +124,6 @@ while blockStart < inputLen
     DelayFilters.setValues(delayLineInput);
     
     output(blkInd,:) = OutputGains.filter(delayOutput);
-    if ~isempty(extraMatrixType) && strcmp(extraMatrixType, 'Circulant')
-        output(blkInd,:) = real(output(blkInd,:));
-    end
     
     %% Move to next block
     DelayFilters.next(blkSz);

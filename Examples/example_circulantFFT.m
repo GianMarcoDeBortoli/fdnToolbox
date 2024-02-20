@@ -60,6 +60,7 @@ for it = 1:length(matrixTypes)
             spread = 0.7;
     end
 
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % feedback time variation method
     TVmatrixType = 'Circulant';    % 'Rotational' or 'Circulant' or ''
 
@@ -68,6 +69,7 @@ for it = 1:length(matrixTypes)
     elseif strcmp(TVmatrixType, 'Circulant')
         TVmatrix = circulantMatrix(feedbackMatrix, N, modulationFrequency, modulationAmplitude, fs, spread);
     end
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
     % FDN processing
     reverbedSynth.(type) = processFDN(synth, delays, feedbackMatrix, inputGain, outputGain, direct, 'inputType', 'mergeInput', 'extraMatrixType', TVmatrixType, 'extraMatrix', TVmatrix, 'absorptionFilters', zAbsorption);    
