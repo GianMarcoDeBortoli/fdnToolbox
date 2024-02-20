@@ -105,17 +105,14 @@ while blockStart < inputLen
     if isempty(extraMatrixType)
         % only static feedback matrix
         feedback = FeedbackMatrix.filter(delayOutput);
-        disp("I'm static");
     elseif ~isempty(extraMatrixType) && strcmp(extraMatrixType, 'Rotational')
         % static feedback matrix
         feedback = FeedbackMatrix.filter(delayOutput);
         % time-varying rotational matrix
         feedback = extraMatrix.filter(feedback);
-        disp("I'm rotational");
     elseif ~isempty(extraMatrixType) && strcmp(extraMatrixType, 'Circulant')
         % only time-varying circulant matrix
         feedback = extraMatrix.filter(delayOutput);
-        disp("I'm circulant");
     end
     
     %% Input and Output
