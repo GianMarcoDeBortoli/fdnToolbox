@@ -30,11 +30,13 @@ function output = processFDN(input, delays, A, B, C, D, varargin)
 %% Input Parser
 p = inputParser;
 p.addParameter('inputType','mergeInput',@(x) ischar(x) );
+p.addParameter('extraMatrixType','',@(x) ischar(x) );
 p.addParameter('extraMatrix',[]);
 p.addParameter('absorptionFilters',eye(numel(delays)));
 parse(p,varargin{:});
 
 inputType = p.Results.inputType;
+extraMatrixType = p.Results.extraMatrixType;
 extraMatrix = p.Results.extraMatrix;
 absorptionFilters = p.Results.absorptionFilters;
 
@@ -54,19 +56,19 @@ switch inputType
         for itIn = 1:numInput
             splitGain(:) = 0;
             splitGain(itIn) = 1;
-            output(:,:,itIn) = computeFDNloop(input .* splitGain, delays, A, B, C, extraMatrix, absorptionFilters);
+            output(:,:,itIn) = computeFDNloop(input .* splitGain, delays, A, B, C, extraMatrixType, extraMatrix, absorptionFilters);
         end
         output = output + permute( input, [1 3 2]) .* permute( D, [3 1 2]) ;
         
     case 'mergeInput'
-        output = computeFDNloop(input, delays, A, B, C, extraMatrix, absorptionFilters);
+        output = computeFDNloop(input, delays, A, B, C, extraMatrixType, extraMatrix, absorptionFilters);
         output = output + input * D.';
 end
 
 
 
 
-function output = computeFDNloop(input, delays, feedbackMatrix, inputGains, outputGains, extraMatrix, absorptionFilters)
+function output = computeFDNloop(input, delays, feedbackMatrix, inputGains, outputGains, extraMatrixType, extraMatrix, absorptionFilters)
 %% Compute the FDN time domain loop
 maxBlockSize = 2^12;
 blkSz = min([min(delays), maxBlockSize]);
@@ -100,9 +102,20 @@ while blockStart < inputLen
     end
     
     %% Feedback Matrices
-    feedback = FeedbackMatrix.filter(delayOutput);
-    if ~isempty(extraMatrix)
+    if isempty(extraMatrixType)
+        % only static feedback matrix
+        feedback = FeedbackMatrix.filter(delayOutput);
+        disp("I'm static");
+    elseif ~isempty(extraMatrixType) && strcmp(extraMatrixType, 'Rotational')
+        % static feedback matrix
+        feedback = FeedbackMatrix.filter(delayOutput);
+        % time-varying rotational matrix
         feedback = extraMatrix.filter(feedback);
+        disp("I'm rotational");
+    elseif ~isempty(extraMatrixType) && strcmp(extraMatrixType, 'Circulant')
+        % only time-varying circulant matrix
+        feedback = extraMatrix.filter(delayOutput);
+        disp("I'm circulant");
     end
     
     %% Input and Output
@@ -110,6 +123,9 @@ while blockStart < inputLen
     DelayFilters.setValues(delayLineInput);
     
     output(blkInd,:) = OutputGains.filter(delayOutput);
+    if ~isempty(extraMatrixType) && strcmp(extraMatrixType, 'Circulant')
+        output(blkInd,:) = real(output(blkInd,:));
+    end
     
     %% Move to next block
     DelayFilters.next(blkSz);
