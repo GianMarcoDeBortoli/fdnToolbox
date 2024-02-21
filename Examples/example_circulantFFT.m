@@ -6,7 +6,7 @@
 % Sebastian J. Schlecht, Saturday, 28 December 2019
 % Modified by: Gian Marco De Bortoli, Tuesday, 20 February 2024
 
-clear; clc; close all;
+clear; clc;% close all;
 
 rng(1);
 
@@ -24,7 +24,7 @@ switch 'melody'
 end
 
 % Define FDN
-N = 8;
+N = 64;
 numInput = 2;
 numOutput = 2;
 inputGain = orth(randn(N,numInput));
@@ -62,7 +62,7 @@ for it = 1:length(matrixTypes)
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % feedback time variation method
-    TVmatrixType = 'Circulant';    % 'Rotational' or 'Circulant' or ''
+    TVmatrixType = 'Rotational';    % 'Rotational' or 'Circulant' or ''
 
     if strcmp(TVmatrixType, 'Rotational')
         TVmatrix = timeVaryingMatrix(N, modulationFrequency, modulationAmplitude, fs, spread);
@@ -77,7 +77,7 @@ for it = 1:length(matrixTypes)
 end
 
 %% Plot
-figure(1); hold on; grid on;
+figure(); hold on; grid on;
 
 for it = 1:length(matrixTypes)
     plot(time, reverbedSynth.(matrixTypes{it})(:,1) + it*2);
@@ -87,7 +87,7 @@ xlabel('Time [seconds]')
 ylabel('Amplitude')
 
 % sound
-% soundsc(reverbedSynth1.SlowVariation,fs);
+% soundsc(reverbedSynth.SlowVariation,fs);
 
 %% Test: Script finished
 assert(1 == 1)

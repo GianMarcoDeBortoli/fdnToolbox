@@ -59,13 +59,19 @@ classdef circulantMatrix < handle
             obj.currentEigValues = e(end,:)';
 
             % feedback processing
-            N = obj.numberOfOutputs;
-            rows = 1/N * fft(e, N, 2);
-            C = blockCirculant(rows, len, N);
+            % N = obj.numberOfOutputs;
+            % rows = 1/N * fft(e, N, 2);
+            % C = blockCirculant(rows, len, N);
             
             % output
-            out = sum(C .* in, 2);
-            out = squeeze(out);
+            % out = sum(C .* in, 2);
+            % out = squeeze(out);
+
+
+            N = obj.numberOfOutputs;
+            in_evDomain = fft(in, N, 2);
+            in_update = in_evDomain .* e;
+            out = ifft(in_update, N, 2);
 
         end
         
