@@ -30,7 +30,6 @@ function output = processFDN(input, delays, A, B, C, D, varargin)
 %% Input Parser
 p = inputParser;
 p.addParameter('inputType','mergeInput',@(x) ischar(x) );
-p.addParameter('extraMatrixType','',@(x) ischar(x) );
 p.addParameter('extraMatrix',[]);
 p.addParameter('absorptionFilters',eye(numel(delays)));
 parse(p,varargin{:});
@@ -64,11 +63,6 @@ switch inputType
         output = computeFDNloop(input, delays, A, B, C, extraMatrixType, extraMatrix, absorptionFilters);
         output = output + input * D.';
 end
-
-if ~isempty(extraMatrixType) && strcmp(extraMatrixType, 'Circulant')
-        output = real(output);
-end
-
 
 
 
@@ -105,18 +99,9 @@ while blockStart < inputLen
        delayOutput = absorptionFilters.filter(delayOutput); 
     end
     
-    %% Feedback Matrices
-    if isempty(extraMatrixType)
-        % only static feedback matrix
-        feedback = FeedbackMatrix.filter(delayOutput);
-    elseif ~isempty(extraMatrixType) && strcmp(extraMatrixType, 'Rotational')
-        % static feedback matrix
-        feedback = FeedbackMatrix.filter(delayOutput);
-        % time-varying rotational matrix
+    feedback = FeedbackMatrix.filter(delayOutput);
+    if ~isempty(extraMatrixType)
         feedback = extraMatrix.filter(feedback);
-    elseif ~isempty(extraMatrixType) && strcmp(extraMatrixType, 'Circulant')
-        % only time-varying circulant matrix
-        feedback = extraMatrix.filter(delayOutput);
     end
     
     %% Input and Output

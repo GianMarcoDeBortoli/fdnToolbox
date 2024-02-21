@@ -17,32 +17,32 @@ classdef circulantMatrix < handle
     end
     
     methods
-        function obj = circulantMatrix(A, N, cyclesPerSecond, amplitude, fs, spread)
+        function obj = circulantMatrix(N, cyclesPerSecond, amplitude, fs, spread)
 
-            % initialize circulant matrix
-            obj.initEigValues = eig(A);
-            obj.initMatrix = circulant(1/N * fft(obj.initEigValues), 1);
+            % Initialize circulant matrix
+            phi = eps + (pi-2*eps)*rand(1, ceil(N/2)-1);
+            e = exp(1i*phi);
+            if mod(N,2) == 0
+                e = [1, e, -1, fliplr(conj(e))];
+            else
+                e = [1, e, fliplr(conj(e))];
+            end
+            obj.initMatrix = circulant(ifft(e, N), 1);
+            assert(isreal(obj.initMatrix));
 
-            % define oscillators for eigenvalues time-variation
-            R = tinyRotationMatrix(N,1/fs);
 
-            [v,e] = eig(R);
-
+            % generate eigenvalue oscillators
             cyclesPerSample = cyclesPerSecond / fs;
             
-            frequencySpread = 2*(rand(1,N)-0.5) * spread + 1;
-            amplitudeSpread = 2*(rand(1,N)-0.5) * spread + 1;
+            frequencySpread = 2*(rand(1,ceil(N/2)-1)-0.5) * spread + 1;
+            amplitudeSpread = 2*(rand(1,ceil(N/2)-1)-0.5) * spread + 1;
+            oscAmplitude = amplitude * pi/2;
             
-            % make conjugate pairs
-            IDX = nearestneighbour(v,conj(v));
-            amplitudeSpread = (amplitudeSpread(IDX) + amplitudeSpread) / 2;
-            frequencySpread = (frequencySpread(IDX) + frequencySpread) / 2;
-            complexConjugateSign = sign(angle(diag(e))).';
-            oscAmplitude = complexConjugateSign * amplitude * pi/2;
-            
-            % make eigenvalue oscillators
-            obj.osc = complexOscillatorBank( frequencySpread .* cyclesPerSample, amplitudeSpread .* oscAmplitude);
-
+            if mod(N,2) == 0
+                obj.osc = circulantEvenComplexOscillatorBank( frequencySpread .* cyclesPerSample, amplitudeSpread .* oscAmplitude);
+            else
+                obj.osc = circulantOddComplexOscillatorBank( frequencySpread .* cyclesPerSample, amplitudeSpread .* oscAmplitude);
+            end
             
             % channels
             obj.numberOfOutputs = N;
@@ -52,26 +52,17 @@ classdef circulantMatrix < handle
         
         function out = filter(obj,in)
 
-            % updated eigenvalues
+            % update oscillators
             len = size(in,1);
-            o = obj.osc.get(len);
-            e = o .* obj.initEigValues';
-            obj.currentEigValues = e(end,:)';
-
-            % feedback processing
-            % N = obj.numberOfOutputs;
-            % rows = 1/N * fft(e, N, 2);
-            % C = blockCirculant(rows, len, N);
+            e = obj.osc.get(len);
             
-            % output
-            % out = sum(C .* in, 2);
-            % out = squeeze(out);
-
-
+            % number of fft
             N = obj.numberOfOutputs;
+
+            % filtering
             in_evDomain = fft(in, N, 2);
             in_update = in_evDomain .* e;
-            out = ifft(in_update, N, 2);
+            out = real(ifft(in_update, N, 2));
 
         end
         

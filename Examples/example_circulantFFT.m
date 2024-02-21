@@ -6,7 +6,7 @@
 % Sebastian J. Schlecht, Saturday, 28 December 2019
 % Modified by: Gian Marco De Bortoli, Tuesday, 20 February 2024
 
-clear; clc;% close all;
+clear; clc; close all;
 
 rng(1);
 
@@ -24,7 +24,7 @@ switch 'melody'
 end
 
 % Define FDN
-N = 64;
+N = 8;
 numInput = 2;
 numOutput = 2;
 inputGain = orth(randn(N,numInput));
@@ -60,24 +60,14 @@ for it = 1:length(matrixTypes)
             spread = 0.7;
     end
 
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % feedback time variation method
-    TVmatrixType = 'Rotational';    % 'Rotational' or 'Circulant' or ''
-
-    if strcmp(TVmatrixType, 'Rotational')
-        TVmatrix = timeVaryingMatrix(N, modulationFrequency, modulationAmplitude, fs, spread);
-    elseif strcmp(TVmatrixType, 'Circulant')
-        TVmatrix = circulantMatrix(feedbackMatrix, N, modulationFrequency, modulationAmplitude, fs, spread);
-    end
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
     % FDN processing
-    reverbedSynth.(type) = processFDN(synth, delays, feedbackMatrix, inputGain, outputGain, direct, 'inputType', 'mergeInput', 'extraMatrixType', TVmatrixType, 'extraMatrix', TVmatrix, 'absorptionFilters', zAbsorption);    
+    TVmatrix = circulantMatrix(N, modulationFrequency, modulationAmplitude, fs, spread);
+    reverbedSynth.(type) = processFDN(synth, delays, feedbackMatrix, inputGain, outputGain, direct, 'inputType', 'mergeInput', 'extraMatrix', TVmatrix, 'absorptionFilters', zAbsorption);    
 
 end
 
 %% Plot
-figure(); hold on; grid on;
+figure(1); hold on; grid on;
 
 for it = 1:length(matrixTypes)
     plot(time, reverbedSynth.(matrixTypes{it})(:,1) + it*2);
