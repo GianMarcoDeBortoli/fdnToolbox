@@ -25,6 +25,8 @@ classdef circulantEvenComplexOscillatorBank < handle
             ramp = (1:len)';
             time = obj.state + ramp .* obj.cyclesPerSample;
             angle = obj.amplitude .* sin( time );
+            % angle = obj.amplitude .* sawtooth(time);
+            % angle = obj.amplitude .* square(time);
             output = exp(1i*angle);
 
             vec1 = ones(len,1);
