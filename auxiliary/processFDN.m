@@ -35,7 +35,6 @@ p.addParameter('absorptionFilters',eye(numel(delays)));
 parse(p,varargin{:});
 
 inputType = p.Results.inputType;
-extraMatrixType = p.Results.extraMatrixType;
 extraMatrix = p.Results.extraMatrix;
 absorptionFilters = p.Results.absorptionFilters;
 
@@ -55,18 +54,18 @@ switch inputType
         for itIn = 1:numInput
             splitGain(:) = 0;
             splitGain(itIn) = 1;
-            output(:,:,itIn) = computeFDNloop(input .* splitGain, delays, A, B, C, extraMatrixType, extraMatrix, absorptionFilters);
+            output(:,:,itIn) = computeFDNloop(input .* splitGain, delays, A, B, C, extraMatrix, absorptionFilters);
         end
         output = output + permute( input, [1 3 2]) .* permute( D, [3 1 2]) ;
         
     case 'mergeInput'
-        output = computeFDNloop(input, delays, A, B, C, extraMatrixType, extraMatrix, absorptionFilters);
+        output = computeFDNloop(input, delays, A, B, C, extraMatrix, absorptionFilters);
         output = output + input * D.';
 end
 
 
 
-function output = computeFDNloop(input, delays, feedbackMatrix, inputGains, outputGains, extraMatrixType, extraMatrix, absorptionFilters)
+function output = computeFDNloop(input, delays, feedbackMatrix, inputGains, outputGains, extraMatrix, absorptionFilters)
 %% Compute the FDN time domain loop
 maxBlockSize = 2^12;
 blkSz = min([min(delays), maxBlockSize]);
@@ -100,7 +99,7 @@ while blockStart < inputLen
     end
     
     feedback = FeedbackMatrix.filter(delayOutput);
-    if ~isempty(extraMatrixType)
+    if ~isempty(extraMatrix)
         feedback = extraMatrix.filter(feedback);
     end
     
