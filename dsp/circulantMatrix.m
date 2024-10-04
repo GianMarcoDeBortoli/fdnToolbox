@@ -39,9 +39,9 @@ classdef circulantMatrix < handle
             oscAmplitude = amplitude * pi/2;
             
             if mod(N,2) == 0
-                obj.osc = circulantEvenComplexOscillatorBank( frequencySpread .* cyclesPerSample, amplitudeSpread .* oscAmplitude);
+                obj.osc = circulantEvenComplexOscillatorBank(frequencySpread .* cyclesPerSample, amplitudeSpread .* oscAmplitude);
             else
-                obj.osc = circulantOddComplexOscillatorBank( frequencySpread .* cyclesPerSample, amplitudeSpread .* oscAmplitude);
+                obj.osc = circulantOddComplexOscillatorBank(frequencySpread .* cyclesPerSample, amplitudeSpread .* oscAmplitude);
             end
             
             % channels

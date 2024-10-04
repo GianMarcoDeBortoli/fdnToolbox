@@ -56,7 +56,7 @@ for it = 1:length(matrixTypes)
             spread = 0.3;
         case 'FastVariation'
             modulationFrequency = 10; % hz
-            modulationAmplitude = 0.1;
+            modulationAmplitude = 0.5;
             spread = 0.7;
     end
 
